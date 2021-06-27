@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<header>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css"> 
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <link rel="stylesheet" href="table.css">
+
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
+
+    <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+    
+
+</header>
+
+<body onload="check()">
+    <script>
+        // 判断用户是否为管理员，若不是，则转跳到登录界面
+        function check() {
+            var text = document.cookie
+            var username = text.split("=")[1]
+            console.log(username)
+            if(username != 'guanliyuan') {
+                window.alert("please login first");
+                window.location.href = "http://localhost:3000/login.html"
+            }
+        }
+    </script>
+
+    <div class="container">
+        <div class="row clearfix">
+            <div class="col-md-12 column">
+
+                <div class="page-header">
+                    <h1>
+                        欢迎查看、管理注册用户
+                    </h1>
+                </div>
+
+                <br>
+                <h3>
+                    用户的操作记录：
+                </h3>
+
+                <div class="cardLayout" style="margin: 10px 0px">
+                    <table width="100%" id="record1"></table>
+                </div>
+
+                <script>
+                    $(document).ready(function() {
+                        
+                        $.get('/get_user_operation', function(data) {
+                            $("#record1").empty();
+
+                            $("#record1").append('<tr class="cardLayout"><td>username</td><td>operation</td><td>time</td></tr>');
+                            for (let list of data) {
+                                let table = '<tr class="cardLayout"><td>';
+                                Object.values(list).forEach(element => {
+                                    table += (element + '</td><td>');
+                                });
+                                $("#record1").append(table + '</td></tr>');
+                            }
+
+                        })
+            
+                    });
+                </script>  
+                
+                
+                <br>
+                <h3>
+                    管理注册用户：
+                </h3>
+
+                <div class="cardLayout" style="margin: 10px 0px">
+                    <table width="100%" id="record2"></table>
+                </div>
+
+                <script>
+                    $(document).ready(function() {
+                        
+                        $.get('/regist_user', function(data) {
+                            $("#record2").empty();
+
+                            $("#record2").append('<tr class="cardLayout"><td>username</td><td>ban_user</td><td>start_user</td></tr>');
+                            for (let list of data) {
+                                let table = '<tr class="cardLayout"><td>';
+                                Object.values(list).forEach(element => {
+                                    table += (element + '</td><td>');
+                                });
+                                $("#record2").append(table + '<input type="button" id="ban_user" value="停用"></td><td><input type="button" id="start_user" value="启用"></td></tr>');
+                            }
+
+                            $(document).on('click', '#ban_user', function () {
+                                var username = $(this).parents("tr").find("td").eq(0).text();   //得到用户名
+                                // 将用户名传递至ban_user路由，从而禁止用户
+                                $.ajax({
+                                    url: "/ban_user",
+                                    async: false,        //这一步是非常重要的，作用是设置为同步执行
+                                    type: "POST",
+                                    data: { name:username},
+                                    dataType: "json",
+                                    success: function (data) {
+                                        // 后端传递内容的类型为object，直接进行解析
+                                        console.log(typeof(data))
+                                        console.log(data)
+                                        var status = data['status']
+                                        window.alert(status)
+                                        window.location.href = "http://localhost:3000/administrator.html"
+                                    }
+                                })
+                            })
+
+                            $(document).on('click', '#start_user', function () {
+                                var username = $(this).parents("tr").find("td").eq(0).text();   //得到用户名
+                                // 将用户名传递至ban_user路由，从而禁止用户
+                                $.ajax({
+                                    url: "/start_user",
+                                    async: false,        //这一步是非常重要的，作用是设置为同步执行
+                                    type: "POST",
+                                    data: { name:username},
+                                    dataType: "json",
+                                    success: function (data) {
+                                        // 后端传递内容的类型为object，直接进行解析
+                                        console.log(typeof(data))
+                                        console.log(data)
+                                        var status = data['status']
+                                        window.alert(status)
+                                        window.location.href = "http://localhost:3000/administrator.html"
+                                    }
+                                })
+                            })
+
+                        })
+            
+                    });
+                </script>    
+
+               
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

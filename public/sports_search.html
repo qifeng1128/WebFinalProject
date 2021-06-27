@@ -1,0 +1,124 @@
+
+
+<!DOCTYPE html>
+<html>
+<header>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css"> \
+    <script src="//cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script> 
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+
+    
+    <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+
+</header>
+
+<body>
+    <div class="container">
+        <div class="row clearfix">
+            <div class="col-md-12 column">
+
+                <div class="page-header">
+                    <h1>
+                        欢迎查看网易体育网查询词的热度分析！
+                    </h1>
+                </div>
+
+
+                <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                <div id="title" style="width: 400px;height:300px;"></div>
+                <script type="text/javascript">
+
+                    // 判断用户是否已经登录，若用户未登录，则无法查看数据
+                    $.get('/check', function(data) {
+                        console.log(data)
+                        if(data == false) {
+                            window.alert("please login first");
+                            window.location.href = "http://localhost:3000/login.html"
+                        }
+                    })
+
+                    // 基于准备好的dom，初始化echarts实例
+                    var myChart1 = echarts.init(
+                        document.getElementById('title'),
+                        null,
+                        {
+                            renderer: "svg",
+                        }
+                    );
+
+                    // 异步加载数据
+                    $.get('/sports_title_info').done(function (result) {
+                        myChart1.setOption({
+                            title: {
+                                text: '标题查询词的热度分析'
+                            },
+                            tooltip: {},
+                            xAxis: {
+                                data: result[0]
+                            },
+                            yAxis: {},
+                            series: [{
+                                name: '频数',
+                                type: 'bar',
+                                data: result[1]
+                            }]
+                    })
+                    })
+                </script>
+
+
+                <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                <div id="content" style="width: 400px;height:300px;"></div>
+                <script type="text/javascript">
+                    // 基于准备好的dom，初始化echarts实例
+                    var myChart2 = echarts.init(
+                        document.getElementById('content'),
+                        null,
+                        {
+                            renderer: "svg",
+                        }
+                    );
+
+                    // 异步加载数据
+                    $.get('/sports_content_info').done(function (result) {
+                        var the_name = []; //类别数组（用于存放饼图的类别）
+                        var the_data = [];
+                        for (var i = 0; i < result[0].length; i++) {
+                            the_data.push({
+                                value : result[1][i],
+                                name : result[0][i]
+                            });
+                            the_name.push(result[0][i]);
+                        }
+ 
+                        myChart2.setOption({
+                            title: {
+                                text: '内容查询词的热度分析',
+                                x:'center'
+                            },
+                            tooltip : {
+                                trigger : 'item',
+                                formatter : "{a} <br/>{b} : {c} ({d}%)"
+                            },
+                            legend: {
+                                orient : 'vertical',
+                                left : 'left',
+                                data: the_name
+                            },
+                            series: [{
+                                name: '频数',
+                                type: 'pie',
+                                data: the_data
+                            }]
+                        })
+                    })
+                </script>
+
+ 
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

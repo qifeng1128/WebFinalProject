@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<header>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css"> 
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <link rel="stylesheet" href="table.css">
+
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css">
+
+    <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+</header>
+
+<body>
+    <div class="container">
+        <div class="row clearfix">
+            <div class="col-md-12 column">
+
+                <div class="page-header">
+                    <h1>
+                        欢迎查询东方财富网的新闻信息！
+                    </h1>
+                    <h3>
+                        （若某一查询类别无具体要求，选项框内不填写即可）
+                    </h3>
+                </div>
+
+
+                <form>
+                    <br> 标题：<input type="text" name="title_text">
+                    <br>
+                    <br> 内容：<input type="text" name="content_text">
+                    <br>
+                    <br> 编辑：<input type="text" name="editor_text">
+                    <br>
+                    <br> 摘要：<input type="text" name="description_text">
+                    <br>
+                    <br> 刊登时间：<input type="text" name="publish_time_text">
+                    <br>
+                    <br> <input class="form-submit" type="button" value="查询">
+                </form>
+
+
+                <br>
+                <h2>
+                    欢迎查看 最新新闻
+                </h2>
+                
+
+                <div class="cardLayout" style="margin: 10px 0px">
+                    <table width="100%" id="record1"></table>
+                </div>
+
+                <script>
+                    $(document).ready(function() {
+                        
+                        // 判断用户是否已经登录，若用户未登录，则无法查看数据
+                        $.get('/check', function(data) {
+                            console.log(data)
+                            if(data == false) {
+                                window.alert("please login first");
+                                window.location.href = "http://localhost:3000/login.html"
+                            }
+                        })
+
+                        $.get('/get_recommand_finance_info', function(data) {
+                            $("#record1").empty();
+
+                            $("#record1").append('<tr class="cardLayout"><td>url</td><td>source</td><td>title</td><td>editor</td><td>publish_date</td><td>participate_number</td></tr>');
+                            for (let list of data) {
+                                let table = '<tr class="cardLayout"><td>';
+                                Object.values(list).forEach(element => {
+                                    table += (element + '</td><td>');
+                                });
+                                $("#record1").append(table + '</td></tr>');
+                            }
+                        })
+            
+                    });
+                </script>
+
+                <br>
+                <h2>
+                    欢迎查看 您的查询结果
+                </h2>
+
+
+                <div class="cardLayout" style="margin: 10px 0px">
+                    <table width="100%" id="record2"></table>
+                </div>
+
+                <script>
+                    $(document).ready(function() {
+                        $("input:button").click(function() {
+                            var params = '/get_finance_info?title=' + $('input[name="title_text"]').val() + 
+                            '&content=' + $('input[name="content_text"]').val()  + 
+                            '&editor=' + $('input[name="editor_text"]').val()  + 
+                            '&description=' + $('input[name="description_text"]').val()  + 
+                            '&publish_time=' + $('input[name="publish_time_text"]').val()
+                            $(function(){
+                                $("#record2").empty();
+
+                                $('#record2').bootstrapTable({
+                                url:params,
+                                method:'GET',
+                                pagination:true,
+                                sidePagination:'client',
+                                pageSize:5,
+                                striped : true,
+                                showRefresh:true,
+                                search:true,
+                                showToggle: true,
+                                toolbar: '#toolbar',
+                                showColumns : true,
+                                columns:[{
+                                    field:'url',
+                                    title:'url',
+                                },{
+                                    field:'source',
+                                    title:'source',
+                                },{
+                                    field:'title',
+                                    title:'title',
+                                    sortable : true
+                                },{
+                                    field:'editor',
+                                    title:'editor',
+                                },{
+                                    field:'new_publish_date',
+                                    title:'publish_date',
+                                    sortable : true
+                                },{
+                                    field:'participate_number',
+                                    title:'participate_number',
+                                    sortable : true
+                                }]
+                            })
+                        });
+
+
+                        });
+            
+                    });
+                </script>
+
+                <br>
+                <h2>
+                    欢迎查看 查询词的时间热度分析
+                </h2>
+
+                <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                <div id="time" style="width: 800px;height:500px;"></div>
+                <script type="text/javascript">
+
+                    $(document).ready(function() {
+                        $("input:button").click(function() {
+                    
+                            // 基于准备好的dom，初始化echarts实例
+                            var myChart2 = echarts.init(document.getElementById('time'));
+
+                            // 异步加载数据
+                            var param = '/finance_time_info?title=' + $('input[name="title_text"]').val()
+                            $.get(param).done(function (result) {
+                                myChart2.setOption({
+                                    tooltip: {},
+                                    xAxis: {
+                                        data: result[0]
+                                    },
+                                    yAxis: {},
+                                    series: [{
+                                        name: '频数',
+                                        type: 'line',
+                                        data: result[1]
+                                    }]
+                                })
+                            })
+                        })
+                    })
+
+
+                </script>
+                
+                <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+                <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+                <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+            
+               
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

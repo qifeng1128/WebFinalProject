@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+    <link rel="stylesheet" href="login.css">
+    <meta charset="utf-8">
+    <title>注册界面</title>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="loginBox">
+            <div class="loginBoxCenter">
+                <h1 align="center">用户注册</h1>
+
+                <p>用户名：</p>
+                <p><input type="text" id="username" class="loginInput" placeholder="请输入昵称"></p>
+
+                <p>密码：</p>
+                <p><input type="password" id="password" class="loginInput" placeholder="请输入密码"></p>
+
+            </div>
+
+            <div class="loginBoxButtons">
+
+                <button type="button" class="loginBtn" onclick="userLogin()">注册</button>
+                <script>
+                    function userLogin(){
+                        var username = document.getElementById("username")
+                        var password = document.getElementById("password")
+
+                        // 将用户名和密码传递至user_register路由，从而判断用户是否已经注册
+                        $.ajax({
+                            url: "/user_register",
+                            async: false,        //这一步是非常重要的，作用是设置为同步执行
+                            type: "POST",
+                            data: { name:username.value,pwd:password.value },
+                            dataType: "json",
+                            success: function (data) {
+                                // 后端传递内容的类型为object，直接进行解析
+                                console.log(typeof(data))
+                                console.log(data)
+                                var status = data['status']
+                                window.alert(status)
+                                if (status == "please input your username or password") {
+                                    // 用户未输入用户名或密码，继续停留在注册界面
+                                    window.location.href = "http://localhost:3000/register.html"
+                                }
+                                else{
+                                    // 转跳登录页面   
+                                    window.location.href = "http://localhost:3000/login.html"
+                                }
+                                
+                            }
+                        })
+                    }
+                </script>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+
+</html>

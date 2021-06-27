@@ -1,0 +1,28 @@
+table thead,table tr {
+border-top-width: 1px;
+border-top-style: solid;
+border-top-color: #a8bfde;
+}
+
+table {
+border-bottom-width: 1px;
+border-bottom-style: solid;
+border-bottom-color: #a8bfde;
+}
+
+/* Padding and font style */
+table td, table th {
+padding: 5px 10px;
+font-size: 12px;
+font-family: Verdana;
+color: #5b7da3;
+}
+
+/* Alternating background colors */
+table tr:nth-child(even) {
+background: #d3dfed
+}
+
+table tr:nth-child(odd) {
+background: #FFF
+}
